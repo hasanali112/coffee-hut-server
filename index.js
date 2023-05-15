@@ -1,6 +1,6 @@
 const express = require ('express')
 const cors = require ('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express();
 const port = process.env.PORT || 5000;
@@ -38,6 +38,38 @@ async function run() {
       const result = await cursor.toArray()
       res.send(result);
     })
+
+    //update coffee
+    app.get('/coffee/:id', async (req, res)=>{
+       const id = req.params.id;
+       const query ={_id: new ObjectId(id)}
+       const result = await newCoffeeCollection.findOne(query)
+       res.send(result);
+    })
+
+
+    app.put('/coffee/:id', async (req, res)=>{
+       const id = req.params.id;
+       const filter = {_id: new ObjectId(id)};
+       const options = { upsert: true };
+       const updateCoffee = req.body;
+       const coffee ={
+        $set:{
+          name:updateCoffee.name, 
+          supplier: updateCoffee.supplier, 
+          teste: updateCoffee.teste, 
+          categories: updateCoffee.categories, 
+          detail:updateCoffee.detail, 
+          photo: updateCoffee.photo, 
+          quantity: updateCoffee.quantity
+        }
+       }
+      const result = await newCoffeeCollection.updateOne(filter, coffee, options)
+      res.send(result)
+    })
+
+
+
     //get data from client side
     app.post('/coffee', async (req, res)=>{
       const newCoffee = req.body
@@ -47,6 +79,15 @@ async function run() {
     })
 
 
+
+    
+    //delete data from database
+    app.delete('/coffee/:id', async (req, res)=>{
+       const id = req.params.id;
+       const query = {_id: new ObjectId(id)}
+       const result = await newCoffeeCollection.deleteOne(query)
+       res.send(result)
+    })
 
 
 
